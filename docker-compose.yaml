@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  telegram-bot-api:
+    # Sử dụng image aiogram/telegram-bot-api
+    image: aiogram/telegram-bot-api:latest
+    container_name: telegram-bot-api
+    restart: always
+    ports:
+      # Ánh xạ cổng 8081 ra ngoài VPS. 
+      # Nếu muốn dùng cổng khác, thay đổi số đầu tiên (ví dụ: "8000:8081")
+      - "8081:8081"
+    volumes:
+      # Gắn volume để lưu trữ dữ liệu của API server (bắt buộc)
+      - ./bot-files:/var/lib/telegram-bot-api
+    environment:
+      # Truyền các biến môi trường từ file .env
+      - TELEGRAM_API_ID=
+      - TELEGRAM_API_HASH=
+      # Sử dụng môi trường để truyền token cho image này
+      - TELEGRAM_BOT_TOKEN=
+      - TELEGRAM_LOCAL=true # Bật chế độ hỗ trợ file lớn
+      - TELEGRAM_HTTP_PORT=8081 # Cổng HTTP nội bộ của container

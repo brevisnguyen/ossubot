@@ -60,7 +60,6 @@ def get_host_path_from_url(file_url: str, old_dir_in_container: str, new_dir_on_
     relative_path_from_tdlib = tdlib_local_path.replace(old_dir_in_container, "", 1)
     
     # 2. Gắn thư mục mới vào phần còn lại của đường dẫn
-    # Kết quả sẽ là: bot-files/7616173880:AAGvvBOymP2u9kJfnaPNx3XjQNe8skCW-iI/documents/file_2.zip
     relative_path_to_file = os.path.join(new_dir_on_host, relative_path_from_tdlib.lstrip('/'))
     
     # 3. CHUYỂN THÀNH ĐƯỜNG DẪN TUYỆT ĐỐI (Đây là bước khắc phục lỗi)

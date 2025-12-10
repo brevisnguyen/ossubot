@@ -109,10 +109,6 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         context.user_data["local_file_path"] = local_file_path
         context.user_data["original_file_name"] = file_name
         
-        # await update.message.reply_text(
-        #     f"✅ Đã tải file **{file_name}** về cục bộ: `{local_file_path}`\n\n"
-        #     f"Bây giờ, vui lòng nhập **Bucket Name** của Aliyun OSS bạn muốn upload lên:",
-        # )
         await update.message.reply_text(
             (
                 "文件已成功下载到本地！\n\n"
@@ -130,9 +126,6 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         
     except Exception as e:
         logging.error(f"Lỗi khi tải file: {e}")
-        # await update.message.reply_text(
-        #     f"❌ Có lỗi xảy ra trong quá trình tải file. Vui lòng thử lại.{file_obj}"
-        # )
         await update.message.reply_text(
             (
                 "❌ <b>文件下载失败</b>\n\n"
@@ -149,7 +142,6 @@ async def get_bucket_name(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     bucket_name = update.message.text.strip()
     
     if not bucket_name:
-        # await update.message.reply_text("Bucket Name không được để trống. Vui lòng nhập lại:")
         await update.message.reply_text(
             (
                 "⚠️ <b>存储桶名称不能为空！</b>\n\n"
@@ -163,10 +155,6 @@ async def get_bucket_name(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     context.user_data["bucket_name"] = bucket_name
     original_file_name = context.user_data.get("original_file_name", "file.ext")
 
-    # await update.message.reply_text(
-    #     f"✅ Đã nhận Bucket Name: **{bucket_name}**\n\n"
-    #     f"Bây giờ, vui lòng nhập **tên file** bạn muốn đặt trên OSS (ví dụ: `dir/{original_file_name}`):"
-    # )
     await update.message.reply_text(
         (
             "✅ 已确认存储桶：<b>{bucket_name}</b>\n\n"
@@ -187,7 +175,6 @@ async def get_oss_file_name_and_upload(update: Update, context: ContextTypes.DEF
     oss_object_name = update.message.text.strip()
     
     if not oss_object_name:
-        # await update.message.reply_text("Tên file trên OSS không được để trống. Vui lòng nhập lại:")
         await update.message.reply_text(
             (
                 "⚠️ <b>OSS 对象名称不能为空！</b>\n\n"
@@ -201,7 +188,6 @@ async def get_oss_file_name_and_upload(update: Update, context: ContextTypes.DEF
     bucket_name = context.user_data.get("bucket_name")
     
     if not local_file_path or not bucket_name:
-        # await update.message.reply_text("❌ Lỗi: Thiếu thông tin file hoặc bucket. Vui lòng bắt đầu lại bằng cách gửi file.")
         await update.message.reply_text(
             (
                 "❌ <b>错误</b>：缺少文件或存储桶信息。\n\n"
@@ -213,12 +199,7 @@ async def get_oss_file_name_and_upload(update: Update, context: ContextTypes.DEF
 
     # Lưu tên file OSS
     context.user_data["oss_object_name"] = oss_object_name
-    
-    # await update.message.reply_text(
-    #     f"⏳ Bắt đầu upload file `{os.path.basename(local_file_path)}` lên OSS...\n"
-    #     f"Bucket: `{bucket_name}`\n"
-    #     f"Object Name: `{oss_object_name}`"
-    # )
+
     await update.message.reply_text(
         (
             "⏳ <b>正在上传文件到阿里云 OSS...</b>\n\n"
@@ -264,15 +245,7 @@ async def upload_to_oss_job(context: ContextTypes.DEFAULT_TYPE):
         
         # Lấy URL công khai (nếu bucket có quyền public-read)
         file_url = f"https://{OSS_ENDPOINT}/{oss_object_name}"
-        
-        # await context.bot.send_message(
-        #     chat_id=chat_id,
-        #     text=f"🎉 **File đã được upload lên OSS thành công!**\n\n"
-        #          f"Bucket: `{bucket_name}`\n"
-        #          f"Object Name: `{oss_object_name}`\n"
-        #          f"URL (nếu công khai): [Tải xuống]({file_url})",
-        #          parse_mode="Markdown"
-        # )
+
         await context.bot.send_message(
             chat_id=chat_id,
             text=(
@@ -286,10 +259,6 @@ async def upload_to_oss_job(context: ContextTypes.DEFAULT_TYPE):
         )
         
     except oss2.exceptions.NoSuchBucket:
-        # await context.bot.send_message(
-        #     chat_id=chat_id,
-        #     text=f"❌ Lỗi OSS: **Bucket `{bucket_name}` không tồn tại** hoặc Endpoint `{OSS_ENDPOINT}` không đúng. Vui lòng kiểm tra lại."
-        # )
         await context.bot.send_message(
             chat_id=chat_id,
             text=(
@@ -303,10 +272,6 @@ async def upload_to_oss_job(context: ContextTypes.DEFAULT_TYPE):
             parse_mode='HTML'
         )
     except oss2.exceptions.AccessDenied:
-        # await context.bot.send_message(
-        #     chat_id=chat_id,
-        #     text=f"❌ Lỗi OSS: **Truy cập bị từ chối** (Access Denied). Kiểm tra **Access Key, Secret** và **quyền** của người dùng."
-        # )
         await context.bot.send_message(
             chat_id=chat_id,
             text=(
@@ -324,18 +289,6 @@ async def upload_to_oss_job(context: ContextTypes.DEFAULT_TYPE):
             chat_id=chat_id,
             text=f"❌ 上传到阿里云 OSS 时发生未知错误：\n\n<code>{e}</code>"
         )
-        # Xóa file đã tải về sau khi upload xong (tùy chọn, để tiết kiệm dung lượng)
-        # try:
-        #     os.remove(local_path)
-        #     # Xóa thư mục nếu trống
-        #     download_dir = os.path.dirname(local_path)
-        #     if not os.listdir(download_dir):
-        #         os.rmdir(download_dir)
-        #         parent_dir = os.path.dirname(download_dir)
-        #         if not os.listdir(parent_dir):
-        #             os.rmdir(parent_dir)
-        # except Exception as e:
-        #     logging.warning(f"Không thể xóa file cục bộ {local_path}: {e}")
             
     # Kết thúc hội thoại sau khi upload hoặc gặp lỗi
     return ConversationHandler.END
@@ -348,18 +301,20 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "已取消文件上传。❌\n"
         "您可以发送其他文件重新开始上传到阿里云 OSS。📤"
     )
-    # Xóa file đã tải về nếu tồn tại (tùy chọn)
-    # local_path = context.user_data.get("local_file_path")
-    # if local_path and os.path.exists(local_path):
-    #     try:
-    #         os.remove(local_path)
-    #         # Tùy chọn: Xóa thư mục rỗng
-    #         download_dir = os.path.dirname(local_path)
-    #         if not os.listdir(download_dir):
-    #             os.rmdir(download_dir)
-    #     except Exception as e:
-    #         logging.warning(f"Không thể xóa file cục bộ khi hủy: {e}")
     context.user_data.clear()
+    return ConversationHandler.END
+
+## 🚀 Hàm start (khởi động bot và kết thúc hội thoại nếu có)
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Khởi động bot và kết thúc hội thoại đang diễn ra nếu có."""
+    # Kết thúc hội thoại đang diễn ra nếu có
+    context.user_data.clear()
+    await update.message.reply_text(
+        "您好！👋\n"
+        "请发送文件，我将帮您上传到阿里云 OSS 云存储。\n\n"
+        "支持任意大小文件（最高 2GB）🚀\n"
+        "上传后会返回下载链接 🔗"
+    )
     return ConversationHandler.END
 
 ## ⚙️ Hàm main để chạy Bot
@@ -384,22 +339,13 @@ def main() -> None:
             UPLOADING: [MessageHandler(filters.TEXT | filters.COMMAND, lambda u, c: ConversationHandler.END)], # Không làm gì khi đang upload
         },
 
-        fallbacks=[CommandHandler("cancel", cancel)],
+        fallbacks=[CommandHandler("cancel", cancel), CommandHandler("start", start)],
     )
 
     # Thêm handler vào ứng dụng
+    # Thêm start handler trước ConversationHandler để nó có thể hoạt động khi không có conversation đang diễn ra
+    application.add_handler(CommandHandler("start", start))
     application.add_handler(file_upload_handler)
-    application.add_handler(
-        CommandHandler(
-            "start",
-            lambda update, context: update.message.reply_text(
-                "您好！👋\n"
-                "请发送文件，我将帮您上传到阿里云 OSS 云存储。\n\n"
-                "支持任意大小文件（最高 2GB）🚀\n"
-                "上传后会返回下载链接 🔗"
-            )
-        )
-    )
 
     # Bắt đầu polling
     print("Bot đang chạy...")
